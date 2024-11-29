@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id          String   @id @default(uuid()) @db.VarChar(100)
+  wardId      String   @db.VarChar(100)
+  username    String   @unique @db.VarChar(155)
+  password    String   @db.VarChar(155)
+  userStatus  Boolean  @default(true)
+  userLevel   Role     @default(GUEST)
+  displayName String?  @db.VarChar(150)
+  userPic     String?  @db.VarChar(255)
+  comment     String?  @db.VarChar(255)
+  createBy    String?  @db.VarChar(155)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  ward        Wards    @relation(fields: [wardId], references: [id])
+}
+
+model Wards {
+  id       String    @id @default(uuid()) @db.VarChar(100)
+  wardName String    @db.VarChar(250)
+  wardSeq  Int       @unique @default(autoincrement())
+  hosId    String    @db.VarChar(100)
+  createAt DateTime  @default(now())
+  updateAt DateTime  @default(now()) @updatedAt
+  hospital Hospitals @relation(fields: [hosId], references: [id])
+  user     Users[]
+}
+
+model Hospitals {
+  id           String   @id @default(uuid()) @db.VarChar(100)
+  hosName      String   @db.VarChar(155)
+  hosSeq       Int      @unique @default(autoincrement())
+  hosAddress   String?  @db.VarChar(155)
+  hosTel       String?  @db.VarChar(100)
+  userContact  String?  @db.VarChar(155)
+  userTel      String?  @db.VarChar(100)
+  hosLatitude  String?  @db.VarChar(155)
+  hosLongitude String?  @db.VarChar(155)
+  hosPic       String?  @db.VarChar(255)
+  createAt     DateTime @default(now())
+  updateAt     DateTime @default(now()) @updatedAt
+  ward         Wards[]
+}
+
+enum Role {
+  SUPER
+  SERVICE
+  ADMIN
+  USER
+  LEGACY_ADMIN
+  LEGACY_USER
+  GUEST
+}

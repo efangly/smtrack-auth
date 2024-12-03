@@ -1,7 +1,8 @@
-import { IsNotEmpty, IsString, IsBoolean, MinLength, MaxLength, IsOptional, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsString, IsBoolean, MinLength, MaxLength, IsOptional, IsEnum, IsDate } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { Role } from '@prisma/client';
 
-export class RegisterDto {
+export class CreateUserDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
@@ -51,4 +52,12 @@ export class RegisterDto {
   @IsString()
   @MaxLength(50)
   createBy: string;
+  
+  @IsDate()
+  @IsOptional()
+  createAt: Date;
+
+  @IsDate()
+  @IsOptional()
+  updateAt: Date;
 }

@@ -24,8 +24,8 @@ model Users {
   userPic     String?  @db.VarChar(255)
   comment     String?  @db.VarChar(255)
   createBy    String?  @db.VarChar(155)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createAt    DateTime @default(now())
+  updateAt    DateTime @updatedAt
   ward        Wards    @relation(fields: [wardId], references: [id])
 }
 

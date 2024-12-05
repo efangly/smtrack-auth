@@ -1,9 +1,9 @@
 import { IsString, MaxLength } from 'class-validator';
 
-export class PayloadDto {
+export class JwtPayloadDto {
   @IsString()
   @MaxLength(150)
-  userId: string;
+  id: string;
 
   @IsString()
   @MaxLength(150)
@@ -11,7 +11,7 @@ export class PayloadDto {
 
   @IsString()
   @MaxLength(150)
-  hosId: number;
+  hosId: string;
 
   @IsString()
   @MaxLength(150)

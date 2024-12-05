@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
-import { SkipInterceptor } from '../common/interceptors/skip-interceptor.decorator';
+import { SkipInterceptor } from '../common/decorators/skip-interceptor.decorator';
 
 @Controller('health')
 export class HealthController {

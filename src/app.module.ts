@@ -1,28 +1,27 @@
 import { Module } from '@nestjs/common';
-import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './health/health.module';
-import { RedisOptions } from './common/constants/radis.constant';
 import { UserModule } from './user/user.module';
 import { HospitalModule } from './hospital/hospital.module';
 import { WardModule } from './ward/ward.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy, RefreshJwtStrategy } from './common/strategies';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(), 
-    CacheModule.registerAsync(RedisOptions),
+    PassportModule,
     PrismaModule, 
     AuthModule, 
     HealthModule, 
     UserModule, 
     HospitalModule, 
-    WardModule
+    WardModule, 
+    RedisModule
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [JwtStrategy, RefreshJwtStrategy],
 })
 export class AppModule {}

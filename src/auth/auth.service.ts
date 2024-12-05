@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Users } from '@prisma/client';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
-import { PayloadDto } from './dto/payload.dto';
+import { JwtPayloadDto } from './dto/payload.dto';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 
@@ -43,7 +43,7 @@ export class AuthService {
   }
 
   async login(user: Users | any) {
-    const payload = { userId: user.id, role: user.userLevel, hosId: user.ward.hosId, wardId: user.wardId };
+    const payload = { id: user.id, role: user.userLevel, hosId: user.ward.hosId, wardId: user.wardId };
     return {
       token: this.jwtService.sign(payload, { secret: process.env.JWT_SECRET, expiresIn: process.env.EXPIRE_TIME }),
       refreshToken: this.jwtService.sign(payload, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: process.env.REFRESH_EXPIRE_TIME }),
@@ -54,18 +54,12 @@ export class AuthService {
     };
   }
 
-  async refreshTokens(refreshToken: string) {
-    const decode = this.jwtService.verify(refreshToken, { secret: process.env.JWT_REFRESH_SECRET }) as PayloadDto;
-    // const payload = { username: user.email, sub: user.id };
-    // const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
-    // const newRefreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
-
-    // // อัปเดต Refresh Token ใหม่ในฐานข้อมูล
-    // await this.userService.updateRefreshToken(user.id, newRefreshToken);
-
-    // return {
-    //   access_token: accessToken,
-    //   refresh_token: newRefreshToken,
-    // };
+  refreshTokens(token: string) {
+    const decode = this.jwtService.verify<JwtPayloadDto>(token, { secret: process.env.JWT_REFRESH_SECRET });
+    const payload = { id: decode.id, role: decode.role, hosId: decode.hosId, wardId: decode.wardId };
+    return {
+      token: this.jwtService.sign(payload, { secret: process.env.JWT_SECRET, expiresIn: process.env.EXPIRE_TIME }),
+      refreshToken: this.jwtService.sign(payload, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: process.env.REFRESH_EXPIRE_TIME }),
+    };
   }
 }

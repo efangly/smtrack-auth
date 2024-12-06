@@ -8,6 +8,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse();
     let status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error'; 
+
+    if (exception instanceof Error) {
+      status = HttpStatus.BAD_REQUEST;
+      message = exception.message;
+    }
+    
     if (exception instanceof HttpException) {
       if (typeof exception.getResponse() === 'object') { 
         message = exception.getResponse()['message']; 

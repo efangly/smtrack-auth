@@ -14,19 +14,19 @@ datasource db {
 }
 
 model Users {
-  id          String   @id @default(uuid()) @db.VarChar(100)
-  wardId      String   @db.VarChar(100)
-  username    String   @unique @db.VarChar(155)
-  password    String   @db.VarChar(155)
-  userStatus  Boolean  @default(true)
-  userLevel   Role     @default(GUEST)
-  displayName String?  @db.VarChar(150)
-  userPic     String?  @db.VarChar(255)
-  comment     String?  @db.VarChar(255)
-  createBy    String?  @db.VarChar(155)
-  createAt    DateTime @default(now())
-  updateAt    DateTime @updatedAt
-  ward        Wards    @relation(fields: [wardId], references: [id])
+  id       String   @id @default(uuid()) @db.VarChar(100)
+  wardId   String   @db.VarChar(100)
+  username String   @unique @db.VarChar(155)
+  password String   @db.VarChar(155)
+  status   Boolean  @default(true)
+  role     Role     @default(GUEST)
+  display  String?  @db.VarChar(150)
+  pic      String?  @db.VarChar(255)
+  comment  String?  @db.VarChar(255)
+  createBy String?  @db.VarChar(155)
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  ward     Wards    @relation(fields: [wardId], references: [id])
 }
 
 model Wards {

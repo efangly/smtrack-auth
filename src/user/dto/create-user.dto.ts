@@ -26,22 +26,22 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsBoolean()
-  userStatus: boolean;
+  status: boolean;
 
   @IsOptional()
   @IsEnum(Role, { message: 'Role must be USER or ADMIN' })
-  userLevel: Role;
+  role: Role;
 
   @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(50)
-  displayName: string;
+  display: string;
 
   @IsOptional()
   @IsString()
   @MaxLength(255)
-  userPic: string;
+  pic: string;
 
   @IsOptional()
   @IsString()

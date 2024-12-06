@@ -27,13 +27,13 @@ export class UserService {
       select: {
         id: true,
         username: true,
-        userStatus: true,
-        userLevel: true,
-        displayName: true,
-        userPic: true,
+        status: true,
+        role: true,
+        display: true,
+        pic: true,
         ward: { select: { id: true, wardName: true, hosId: true } }
       },
-      orderBy: { userLevel: 'asc' }
+      orderBy: { role: 'asc' }
     });
     await this.redis.set(key, JSON.stringify(users), 3600 * 10);
     return users
@@ -45,10 +45,10 @@ export class UserService {
       select: {
         id: true,
         username: true,
-        userStatus: true,
-        userLevel: true,
-        displayName: true,
-        userPic: true,
+        status: true,
+        role: true,
+        display: true,
+        pic: true,
         ward: {
           select: {
             id: true,
@@ -69,10 +69,10 @@ export class UserService {
 
   async update(id: string, updateUserDto: UpdateUserDto, file: Express.Multer.File) {
     if (file) {
-      updateUserDto.userPic = await uploadFile(file, 'users');
+      updateUserDto.pic = await uploadFile(file, 'users');
       const user = await this.findOne(id);
-      if (user.userPic) {
-        const fileName = user.userPic.split('/')[user.userPic.split('/').length - 1];
+      if (user.pic) {
+        const fileName = user.pic.split('/')[user.pic.split('/').length - 1];
         await axios.delete(`${process.env.UPLOAD_PATH}/media/image/users/${fileName}`);
       }
     }
@@ -84,8 +84,8 @@ export class UserService {
   async remove(id: string) {
     const user = await this.prisma.users.delete({ where: { id } });
     await this.redis.del("user");
-    if (user.userPic) {
-      const fileName = user.userPic.split('/')[user.userPic.split('/').length - 1];
+    if (user.pic) {
+      const fileName = user.pic.split('/')[user.pic.split('/').length - 1];
       const response = await axios.delete(`${process.env.UPLOAD_PATH}/media/image/users/${fileName}`);
       if (!response.data) throw new BadRequestException('Failed to delete image');
     }

@@ -26,7 +26,7 @@ export class AuthService {
       if (!response.data || !response.data.filePath) {
         throw new BadRequestException('Failed to upload image');
       }
-      data.userPic = `${process.env.UPLOAD_PATH}/${response.data.filePath}`;
+      data.pic = `${process.env.UPLOAD_PATH}/${response.data.filePath}`;
     }
     const hashedPassword = await bcrypt.hash(data.password, 10);
     data.password = hashedPassword;
@@ -43,14 +43,14 @@ export class AuthService {
   }
 
   async login(user: Users | any) {
-    const payload = { id: user.id, role: user.userLevel, hosId: user.ward.hosId, wardId: user.wardId };
+    const payload = { id: user.id, role: user.role, hosId: user.ward.hosId, wardId: user.wardId };
     return {
       token: this.jwtService.sign(payload, { secret: process.env.JWT_SECRET, expiresIn: process.env.EXPIRE_TIME }),
       refreshToken: this.jwtService.sign(payload, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: process.env.REFRESH_EXPIRE_TIME }),
-      userId: user.id,
+      id: user.id,
       hosId: user.ward.hosId,
       wardId: user.wardId,
-      userLevel: user.userLevel
+      role: user.userLevel
     };
   }
 

@@ -14,7 +14,7 @@ CREATE TABLE "Users" (
     "comment" VARCHAR(255),
     "createBy" VARCHAR(155),
     "createAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updateAt" TIMESTAMP(3) NOT NULL,
+    "updateAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Users_pkey" PRIMARY KEY ("id")
 );

@@ -10,7 +10,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let message = 'Internal server error'; 
 
     if (exception instanceof Error) {
-      status = HttpStatus.BAD_REQUEST;
       message = exception.message;
     }
     

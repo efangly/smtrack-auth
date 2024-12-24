@@ -18,6 +18,8 @@ FROM base AS release
 
 WORKDIR /app
 
+RUN apk add --no-cache openssl
+
 COPY --from=build /app/package*.json ./
 
 COPY --from=build /app/dist ./dist

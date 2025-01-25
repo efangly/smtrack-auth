@@ -2,7 +2,7 @@
 /dist
 /node_modules
 /build
-
+deploy.yaml
 # Logs
 logs
 *.log

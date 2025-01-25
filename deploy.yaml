@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentication
+  namespace: smtrack
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: authentication
+  template:
+    metadata:
+      labels:
+        app: authentication
+    spec:
+      containers:
+      - name: authentication
+        image: siamatic/smtrack-auth-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 100m
+          limits:
+            memory: 256Mi
+            cpu: 100m
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: authentication-config
+              key: DATABASE_URL
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: authentication-config
+              key: PORT
+        - name: JWT_SECRET
+          valueFrom:
+            configMapKeyRef:
+              name: jwt-secret
+              key: JWT_SECRET
+        - name: JWT_REFRESH_SECRET
+          valueFrom:
+            configMapKeyRef:
+              name: jwt-secret
+              key: JWT_REFRESH_SECRET
+        - name: EXPIRE_TIME
+          valueFrom:
+            configMapKeyRef:
+              name: authentication-config
+              key: EXPIRE_TIME
+        - name: UPLOAD_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: authentication-config
+              key: UPLOAD_PATH
+        - name: RADIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: RADIS_HOST
+        - name: RADIS_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: RADIS_PASSWORD
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: authentication-config
+              key: NODE_ENV
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentication
+  namespace: smtrack
+spec:
+  selector:
+    app: authentication
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP

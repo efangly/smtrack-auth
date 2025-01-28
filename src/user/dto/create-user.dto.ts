@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsString, IsBoolean, MinLength, MaxLength, IsOptional, IsEnum, IsDate } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { Role } from '@prisma/client';
 
 export class CreateUserDto {
@@ -24,6 +25,12 @@ export class CreateUserDto {
   password: string;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase() === 'true' || value === '1';
+    }
+    return Boolean(value);
+  })
   @IsBoolean()
   status: boolean;
 

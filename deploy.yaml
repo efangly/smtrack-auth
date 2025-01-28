@@ -52,6 +52,11 @@ spec:
             configMapKeyRef:
               name: authentication-config
               key: EXPIRE_TIME
+        - name: REFRESH_EXPIRE_TIME
+          valueFrom:
+            configMapKeyRef:
+              name: authentication-config
+              key: REFRESH_EXPIRE_TIME
         - name: UPLOAD_PATH
           valueFrom:
             configMapKeyRef:

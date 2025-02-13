@@ -19,13 +19,13 @@ export class WardController {
   }
 
   @Get()
-  @Roles(Role.SUPER, Role.SERVICE)
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async findAll() {
     return this.wardService.findAll();
   }
 
   @Get(':id')
-  @Roles(Role.SUPER, Role.SERVICE)
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async findOne(@Param('id') id: string) {
     const ward = await this.wardService.findOne(id);
     if (!ward) throw new NotFoundException("Ward not found");
@@ -33,13 +33,13 @@ export class WardController {
   }
 
   @Put(':id')
-  @Roles(Role.SUPER, Role.SERVICE)
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async update(@Param('id') id: string, @Body() updateWardDto: UpdateWardDto) {
     return this.wardService.update(id, updateWardDto);
   }
 
   @Delete(':id')
-  @Roles(Role.SUPER, Role.SERVICE)
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async remove(@Param('id') id: string) {
     return this.wardService.remove(id);
   }

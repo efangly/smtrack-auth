@@ -15,7 +15,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @Roles(Role.SUPER, Role.SERVICE)
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
@@ -27,7 +27,6 @@ export class UserController {
   }
 
   @Get(':id')
-  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async findOne(@Param('id') id: string) {
     const user = await this.userService.findOne(id);
     if (!user) throw new NotFoundException("User not found");

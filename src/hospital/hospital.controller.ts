@@ -28,7 +28,7 @@ export class HospitalController {
   }
 
   @Get(':id')
-  @Roles(Role.SUPER, Role.SERVICE)
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async findOne(@Param('id') id: string) {
     const hospital = await this.hospitalService.findOne(id);
     if (!hospital) throw new NotFoundException("Hospital not found");
@@ -36,7 +36,7 @@ export class HospitalController {
   }
 
   @Put(':id')
-  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
+  @Roles(Role.SUPER, Role.SERVICE)
   @UseInterceptors(FileInterceptor('image'))
   async update(@Param('id') id: string, @Body() updateHospitalDto: UpdateHospitalDto, @UploadedFile() file: Express.Multer.File) {
     return this.hospitalService.update(id, updateHospitalDto, file);

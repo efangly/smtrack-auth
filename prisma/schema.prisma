@@ -52,6 +52,7 @@ model Hospitals {
   hosLatitude  String?  @db.VarChar(155)
   hosLongitude String?  @db.VarChar(155)
   hosPic       String?  @db.VarChar(255)
+  hosType      HosType  @default(HOSPITAL)
   createAt     DateTime @default(now())
   updateAt     DateTime @default(now()) @updatedAt
   ward         Wards[]
@@ -65,4 +66,13 @@ enum Role {
   LEGACY_ADMIN
   LEGACY_USER
   GUEST
+}
+
+enum HosType {
+  HOSPITAL
+  LEGACY
+  CLINIC
+  PHARMACY
+  LAB
+  OTHER
 }

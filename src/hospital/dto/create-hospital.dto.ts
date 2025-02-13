@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString, MinLength, MaxLength, IsOptional, IsNumber, IsDate } from 'class-validator';
+import { IsNotEmpty, IsString, MinLength, MaxLength, IsOptional, IsNumber, IsDate, IsEnum } from 'class-validator';
+import { HosType } from '@prisma/client';
 
 export class CreateHospitalDto {
   @IsOptional()
@@ -50,6 +51,10 @@ export class CreateHospitalDto {
   @IsString()
   @MaxLength(150)
   hosPic: string;
+
+  @IsOptional()
+  @IsEnum(HosType, { message: 'Invalid hospital type' })
+  hosType: HosType;
 
   @IsDate()
   @IsOptional()

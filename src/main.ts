@@ -11,6 +11,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor(reflector));
   app.useGlobalFilters(new AllExceptionsFilter());
   app.setGlobalPrefix('auth');
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT || 8080);
 }
 bootstrap();

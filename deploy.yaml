@@ -19,13 +19,30 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /auth/health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        livenessProbe:
+          httpGet:
+            path: /auth/health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 5
         resources:
           requests:
             memory: 256Mi
-            cpu: 100m
+            cpu: 250m
           limits:
             memory: 256Mi
-            cpu: 100m
+            cpu: 250m
         env:
         - name: DATABASE_URL
           valueFrom:

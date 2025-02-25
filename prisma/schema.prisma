@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -34,6 +34,7 @@ model Wards {
   id       String    @id @default(uuid()) @db.VarChar(100)
   wardName String    @db.VarChar(250)
   wardSeq  Int       @unique @default(autoincrement())
+  type     WardType? @default(NEW)
   hosId    String    @db.VarChar(100)
   createAt DateTime  @default(now())
   updateAt DateTime  @default(now()) @updatedAt
@@ -75,4 +76,9 @@ enum HosType {
   PHARMACY
   LAB
   OTHER
+}
+
+enum WardType {
+  NEW
+  LEGACY
 }

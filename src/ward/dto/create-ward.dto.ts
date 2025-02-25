@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString, MaxLength, IsOptional, IsNumber, IsDate } from 'class-validator';
+import { WardType } from '@prisma/client';
+import { IsNotEmpty, IsString, MaxLength, IsOptional, IsNumber, IsDate, IsEnum } from 'class-validator';
 
 export class CreateWardDto {
   @IsOptional()
@@ -14,6 +15,10 @@ export class CreateWardDto {
   @IsNumber()
   @IsOptional()
   wardSeq: number
+
+  @IsOptional()
+  @IsEnum(WardType, { message: 'Invalid ward type' })
+  type: WardType;
 
   @IsNotEmpty()
   @IsString()

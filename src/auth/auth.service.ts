@@ -65,14 +65,14 @@ export class AuthService {
   }
 
   async resetPassword(username: string, body: ResetPasswordDto, user: JwtPayloadDto) {
+    const result = await this.userService.findByUsername(username);
+    if (!result) throw new BadRequestException('User not found!!');
     if (user.role !== "SUPER") {
-      const user = await this.userService.findByUsername(username);;
-      if (!user) throw new BadRequestException('User not found!!');
       if (!body.oldPassword) throw new BadRequestException('User not have password!!');
-      const match = await bcrypt.compare(body.oldPassword, user.password);
+      const match = await bcrypt.compare(body.oldPassword, result.password);
       if (!match) throw new BadRequestException('Old password not match!!');
     }
-    await this.userService.update(user.id, { password: await bcrypt.hash(body.password, 10) });
-    return "Reset password success!!";
+    await this.userService.update(result.id, { password: await bcrypt.hash(body.password, 10) });
+    return 'Reset password success!!';
   }
 }

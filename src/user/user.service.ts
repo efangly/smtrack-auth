@@ -14,7 +14,7 @@ export class UserService {
   async create(createUserDto: CreateUserDto) {
     createUserDto.createAt = dateFormat(new Date());
     createUserDto.updateAt = dateFormat(new Date());
-    await this.redis.del("user");
+    await this.redis.del('user');
     return this.prisma.users.create({ data: createUserDto });
   }
 
@@ -67,7 +67,7 @@ export class UserService {
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto, file: Express.Multer.File) {
+  async update(id: string, updateUserDto: UpdateUserDto, file?: Express.Multer.File) {
     if (file) {
       updateUserDto.pic = await uploadFile(file, 'users');
       const user = await this.findOne(id);
@@ -77,13 +77,13 @@ export class UserService {
       }
     }
     updateUserDto.updateAt = dateFormat(new Date());
-    await this.redis.del("user");
+    await this.redis.del('user');
     return this.prisma.users.update({ where: { id }, data: updateUserDto });
   }
 
   async remove(id: string) {
     const user = await this.prisma.users.delete({ where: { id } });
-    await this.redis.del("user");
+    await this.redis.del('user');
     if (user.pic) {
       const fileName = user.pic.split('/')[user.pic.split('/').length - 1];
       const response = await axios.delete(`${process.env.UPLOAD_PATH}/media/image/users/${fileName}`);

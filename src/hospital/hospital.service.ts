@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateHospitalDto } from './dto/create-hospital.dto';
 import { UpdateHospitalDto } from './dto/update-hospital.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -10,7 +10,7 @@ import axios from 'axios';
 
 @Injectable()
 export class HospitalService {
-  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) {}
+  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) { }
   async create(createHospitalDto: CreateHospitalDto, file: Express.Multer.File) {
     if (file) createHospitalDto.hosPic = await uploadFile(file, 'hospitals');
     createHospitalDto.createAt = dateFormat(new Date());
@@ -23,7 +23,7 @@ export class HospitalService {
     const { conditions, key } = this.findCondition(user);
     const cache = await this.redis.get(key);
     if (cache) return JSON.parse(cache);
-    const hospital = await this.prisma.hospitals.findMany({ 
+    const hospital = await this.prisma.hospitals.findMany({
       where: conditions,
       include: { ward: { orderBy: { wardSeq: 'asc' } } },
       orderBy: { hosSeq: 'asc' }
@@ -33,7 +33,7 @@ export class HospitalService {
   }
 
   async findOne(id: string) {
-    return this.prisma.hospitals.findUnique({ 
+    return this.prisma.hospitals.findUnique({
       where: { id },
       include: { ward: { orderBy: { wardSeq: 'asc' } } },
     });
@@ -63,25 +63,36 @@ export class HospitalService {
     return hospital;
   }
 
-  private findCondition (user: JwtPayloadDto): { conditions: Prisma.HospitalsWhereInput | undefined, key: string } {
+  private findCondition(user: JwtPayloadDto): { conditions: Prisma.HospitalsWhereInput | undefined, key: string } {
     let conditions: Prisma.HospitalsWhereInput | undefined = undefined;
     let key = "";
     switch (user.role) {
       case "ADMIN":
-        conditions = { id: user.hosId };
+        conditions = {
+          AND: [
+            { id: user.hosId },
+            { NOT: { id: "HID-DEVELOPMENT" } }
+          ]
+        };
         key = `hospital:${user.hosId}`;
         break;
       case "LEGACY_ADMIN":
-        conditions = { id: user.hosId };
+        conditions = {
+          AND: [
+            { id: user.hosId },
+            { NOT: { id: "HID-DEVELOPMENT" } }
+          ]
+        };
         key = `hospital:${user.hosId}`;
         break;
       case "SERVICE":
         conditions = { NOT: { id: "HID-DEVELOPMENT" } };
         key = "hospital:HID-DEVELOPMENT";
         break;
-      default:
+      case "SUPER":
         conditions = undefined;
-        key = "hospital";
+      default:
+        throw new BadRequestException("Invalid role");
     }
     return { conditions, key };
   }

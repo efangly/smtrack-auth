@@ -10,7 +10,7 @@ import axios from 'axios';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) {}
+  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) { }
   async create(createUserDto: CreateUserDto) {
     createUserDto.createAt = dateFormat(new Date());
     createUserDto.updateAt = dateFormat(new Date());
@@ -92,25 +92,36 @@ export class UserService {
     return user;
   }
 
-  private findCondition (user: JwtPayloadDto): { conditions: Prisma.UsersWhereInput | undefined, key: string } {
+  private findCondition(user: JwtPayloadDto): { conditions: Prisma.UsersWhereInput | undefined, key: string } {
     let conditions: Prisma.UsersWhereInput | undefined = undefined;
     let key = "";
     switch (user.role) {
       case "ADMIN":
-        conditions = { ward: { hosId: user.hosId } };
+        conditions = {
+          AND: [
+            { ward: { hosId: user.hosId } },
+            { NOT: { ward: { hosId: "HID-DEVELOPMENT" } } }
+          ]
+        };
         key = `user:${user.hosId}`;
         break;
       case "LEGACY_ADMIN":
-        conditions = { ward: { hosId: user.hosId } };
+        conditions = {
+          AND: [
+            { ward: { hosId: user.hosId } },
+            { NOT: { ward: { hosId: "HID-DEVELOPMENT" } } }
+          ]
+        };
         key = `user:${user.hosId}`;
         break;
       case "SERVICE":
         conditions = { NOT: { ward: { hosId: "HID-DEVELOPMENT" } } };
         key = "user:HID-DEVELOPMENT";
         break;
-      default:
+      case "SUPER":
         conditions = undefined;
-        key = "user";
+      default:
+        throw new BadRequestException("Invalid role");
     }
     return { conditions, key };
   }

@@ -28,7 +28,7 @@ export class HospitalService {
       include: { ward: { orderBy: { wardSeq: 'asc' } } },
       orderBy: { hosSeq: 'asc' }
     });
-    await this.redis.set(key, JSON.stringify(hospital), 3600 * 10);
+    if (hospital.length > 0) await this.redis.set(key, JSON.stringify(hospital), 3600 * 10);
     return hospital;
   }
 
@@ -91,6 +91,8 @@ export class HospitalService {
         break;
       case "SUPER":
         conditions = undefined;
+        key = "hospital";
+        break;
       default:
         throw new BadRequestException("Invalid role");
     }

@@ -35,7 +35,7 @@ export class UserService {
       },
       orderBy: { role: 'asc' }
     });
-    await this.redis.set(key, JSON.stringify(users), 3600 * 10);
+    if (users.length > 0) await this.redis.set(key, JSON.stringify(users), 3600 * 10);
     return users
   }
 
@@ -116,10 +116,12 @@ export class UserService {
         break;
       case "SERVICE":
         conditions = { NOT: { ward: { hosId: "HID-DEVELOPMENT" } } };
-        key = "user:HID-DEVELOPMENT";
+        key = 'user:HID-DEVELOPMENT';
         break;
       case "SUPER":
         conditions = undefined;
+        key = 'user';
+        break;
       default:
         throw new BadRequestException("Invalid role");
     }

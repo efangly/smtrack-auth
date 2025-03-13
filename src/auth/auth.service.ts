@@ -4,16 +4,16 @@ import { Users } from '@prisma/client';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { JwtPayloadDto } from './dto/payload.dto';
+import { ResetPasswordDto } from './dto/reset.dto';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
-import { ResetPasswordDto } from './dto/reset.dto';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly jwtService: JwtService, private readonly userService: UserService) { }
 
   async register(data: CreateUserDto, file: Express.Multer.File) {
-    const existingUser = await this.userService.findByUsername(data.username);
+    const existingUser = await this.userService.findByUsername(data.username.toLowerCase());
     if (existingUser) throw new BadRequestException('Username already exists');
     if (file) {
       const formData = new FormData();
@@ -44,20 +44,21 @@ export class AuthService {
   }
 
   async login(user: Users | any) {
-    const payload = { id: user.id, role: user.role, hosId: user.ward.hosId, wardId: user.wardId };
+    const payload = { id: user.id, name: user.display, role: user.role, hosId: user.ward.hosId, wardId: user.wardId };
     return {
       token: this.jwtService.sign(payload, { secret: process.env.JWT_SECRET, expiresIn: String(process.env.EXPIRE_TIME) }),
       refreshToken: this.jwtService.sign(payload, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: String(process.env.REFRESH_EXPIRE_TIME) }),
       id: user.id,
+      name: user.display,
       hosId: user.ward.hosId,
       wardId: user.wardId,
-      role: user.userLevel
+      role: user.role
     };
   }
 
   refreshTokens(token: string) {
     const decode = this.jwtService.verify<JwtPayloadDto>(token, { secret: process.env.JWT_REFRESH_SECRET });
-    const payload = { id: decode.id, role: decode.role, hosId: decode.hosId, wardId: decode.wardId };
+    const payload = { id: decode.id, name: decode.name, role: decode.role, hosId: decode.hosId, wardId: decode.wardId };
     return {
       token: this.jwtService.sign(payload, { secret: process.env.JWT_SECRET, expiresIn: String(process.env.EXPIRE_TIME) }),
       refreshToken: this.jwtService.sign(payload, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: String(process.env.REFRESH_EXPIRE_TIME) }),

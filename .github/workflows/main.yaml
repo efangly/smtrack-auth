@@ -29,13 +29,13 @@ jobs:
       with:
         payload: |
           {
-            "text": "GitHub Action build siamatic/smtrack-auth-service result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
+            "text": "GitHub Action build siamatic/smtrack-auth-service result: ${{ job.status }} 🖕",
             "blocks": [
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "GitHub Action build siamatic/smtrack-auth-service result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+                  "text": "GitHub Action build siamatic/smtrack-auth-service result: ${{ job.status }} 🖕🏻"
                 }
               }
             ]

@@ -18,16 +18,15 @@ export class AuthService {
     if (file) {
       const formData = new FormData();
       const blob = new Blob([file.buffer], { type: file.mimetype });
-      formData.append('path', 'users');
       formData.append('file', blob, file.originalname);
-      const response = await axios.post(`${process.env.UPLOAD_PATH}/api/image`, formData, {
+      const response = await axios.post(`${process.env.UPLOAD_PATH}/api/image/user`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      if (!response.data || !response.data.filePath) {
+      if (!response.data || !response.data.path) {
         throw new BadRequestException('Failed to upload image');
       }
-      data.pic = `${process.env.UPLOAD_PATH}/${response.data.filePath}`;
+      data.pic = `${process.env.UPLOAD_PATH}/${response.data.path}`;
     }
     const hashedPassword = await bcrypt.hash(data.password, 10);
     data.password = hashedPassword;

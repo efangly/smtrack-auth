@@ -69,7 +69,7 @@ export class UserService {
 
   async update(id: string, updateUserDto: UpdateUserDto, file?: Express.Multer.File) {
     if (file) {
-      updateUserDto.pic = await uploadFile(file, 'users');
+      updateUserDto.pic = await uploadFile(file, 'user');
       const user = await this.findOne(id);
       if (user.pic) {
         const fileName = user.pic.split('/')[user.pic.split('/').length - 1];

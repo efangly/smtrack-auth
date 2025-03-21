@@ -12,7 +12,7 @@ import axios from 'axios';
 export class HospitalService {
   constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) { }
   async create(createHospitalDto: CreateHospitalDto, file: Express.Multer.File) {
-    if (file) createHospitalDto.hosPic = await uploadFile(file, 'hospitals');
+    if (file) createHospitalDto.hosPic = await uploadFile(file, 'hospital');
     createHospitalDto.createAt = dateFormat(new Date());
     createHospitalDto.updateAt = dateFormat(new Date());
     await this.redis.del("hospital");
@@ -41,7 +41,7 @@ export class HospitalService {
 
   async update(id: string, updateHospitalDto: UpdateHospitalDto, file: Express.Multer.File) {
     if (file) {
-      updateHospitalDto.hosPic = await uploadFile(file, 'hospitals');
+      updateHospitalDto.hosPic = await uploadFile(file, 'hospital');
       const hospital = await this.prisma.hospitals.findUnique({ where: { id } });
       if (hospital.hosPic) {
         const fileName = hospital.hosPic.split('/')[hospital.hosPic.split('/').length - 1];

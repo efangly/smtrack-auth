@@ -9,8 +9,8 @@ export const uploadFile = async (file: Express.Multer.File, path: string): Promi
     { headers: { "Content-Type": "multipart/form-data" } }
   );
 
-  if (!response.data || !response.data.filePath) {
+  if (!response.data || !response.data.path) {
     throw new BadRequestException('Failed to upload image');
   }
-  return `${process.env.UPLOAD_PATH}/${response.data.filePath}`;
+  return `${process.env.UPLOAD_PATH}/${response.data.path}`;
 }

@@ -45,7 +45,7 @@ export class HospitalService {
       const hospital = await this.prisma.hospitals.findUnique({ where: { id } });
       if (hospital.hosPic) {
         const fileName = hospital.hosPic.split('/')[hospital.hosPic.split('/').length - 1];
-        await axios.delete(`${process.env.UPLOAD_PATH}/media/image/hospitals/${fileName}`);
+        await axios.delete(`${process.env.UPLOAD_PATH}/api/image/hospitals/${fileName}`);
       }
     }
     updateHospitalDto.updateAt = dateFormat(new Date());

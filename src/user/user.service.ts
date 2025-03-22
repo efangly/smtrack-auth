@@ -49,11 +49,12 @@ export class UserService {
         role: true,
         display: true,
         pic: true,
+        wardId: true,
         ward: {
           select: {
-            id: true,
             wardName: true,
-            hospital: { select: { id: true, hosName: true, hosPic: true } }
+            hosId: true,
+            hospital: { select: { hosName: true, hosPic: true } }
           },
         }
       }

@@ -51,7 +51,8 @@ export class AuthService {
       name: user.display,
       hosId: user.ward.hosId,
       wardId: user.wardId,
-      role: user.role
+      role: user.role,
+      pic: user.pic,
     };
   }
 

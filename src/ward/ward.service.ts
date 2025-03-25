@@ -24,7 +24,8 @@ export class WardService {
     if (cache) return JSON.parse(cache);
     const ward = await this.prisma.wards.findMany({ 
       where: conditions,
-      include: { hospital: true } 
+      include: { hospital: true },
+      orderBy: { wardSeq: 'asc' }
     });
     if (ward.length > 0) await this.redis.set(key, JSON.stringify(ward), 3600 * 10);
     return ward

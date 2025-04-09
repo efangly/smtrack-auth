@@ -53,6 +53,7 @@ export class UserService {
         ward: {
           select: {
             wardName: true,
+            type: true,
             hosId: true,
             hospital: { select: { hosName: true, hosPic: true } }
           },

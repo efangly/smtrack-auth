@@ -40,7 +40,9 @@ export class UserService {
   }
 
   async findOne(id: string) {
-    return this.prisma.users.findUnique({
+    const cache = await this.redis.get(`user:${id}`);
+    if (cache) return JSON.parse(cache);
+    const user = await this.prisma.users.findUnique({
       where: { id },
       select: {
         id: true,
@@ -60,13 +62,16 @@ export class UserService {
         }
       }
     });
+    await this.redis.set(`user:${id}`, JSON.stringify(user), 3600 * 24);
+    return user;
   }
 
   async findByUsername(username: string) {
-    return this.prisma.users.findUnique({
-      where: { username: username },
-      include: { ward: true }
-    });
+    const cache = await this.redis.get(`user:${username}`);
+    if (cache) return JSON.parse(cache);
+    const user = await this.prisma.users.findUnique({ where: { username: username }, include: { ward: true } });
+    await this.redis.set(`user:${username}`, JSON.stringify(user), 3600 * 24);
+    return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto, file?: Express.Multer.File) {

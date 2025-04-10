@@ -34,14 +34,12 @@ export class UserController {
   }
 
   @Put(':id')
-  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   @UseInterceptors(FileInterceptor('image'))
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @UploadedFile() file: Express.Multer.File) {
     return this.userService.update(id, updateUserDto, file);
   }
 
   @Delete(':id')
-  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }

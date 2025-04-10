@@ -5,12 +5,17 @@ import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { JwtPayloadDto } from './dto/payload.dto';
 import { ResetPasswordDto } from './dto/reset.dto';
+import { RedisService } from '../redis/redis.service';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwtService: JwtService, private readonly userService: UserService) { }
+  constructor(
+    private readonly jwtService: JwtService, 
+    private readonly userService: UserService,
+    private readonly redis: RedisService
+  ) { }
 
   async register(data: CreateUserDto, file: Express.Multer.File) {
     const existingUser = await this.userService.findByUsername(data.username.toLowerCase());
@@ -74,6 +79,8 @@ export class AuthService {
       if (!match) throw new BadRequestException('Old password not match!!');
     }
     await this.userService.update(result.id, { password: await bcrypt.hash(body.password, 10) });
+    await this.redis.del(`user:${username}`);
+    await this.redis.del(`user:${result.id}`);
     return 'Reset password success!!';
   }
 }

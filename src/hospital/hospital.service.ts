@@ -57,7 +57,7 @@ export class HospitalService {
     const hospital = await this.prisma.hospitals.delete({ where: { id } });
     if (hospital.hosPic) {
       const fileName = hospital.hosPic.split('/')[hospital.hosPic.split('/').length - 1];
-      await axios.delete(`${process.env.UPLOAD_PATH}/media/image/hospital/${fileName}`);
+      await axios.delete(`${process.env.UPLOAD_PATH}/api/image/hospital/${fileName}`);
     }
     await this.redis.del("hospital");
     return hospital;

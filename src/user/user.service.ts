@@ -93,7 +93,7 @@ export class UserService {
     await this.redis.del('user');
     if (user.pic) {
       const fileName = user.pic.split('/')[user.pic.split('/').length - 1];
-      const response = await axios.delete(`${process.env.UPLOAD_PATH}/media/image/users/${fileName}`);
+      const response = await axios.delete(`${process.env.UPLOAD_PATH}/api/image/user/${fileName}`);
       if (!response.data) throw new BadRequestException('Failed to delete image');
     }
     return user;

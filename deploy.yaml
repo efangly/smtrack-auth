@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: authentication
-        image: siamatic/smtrack-auth-service:1.0.1-c
+        image: siamatic/smtrack-auth-service:1.1.0
         ports:
         - containerPort: 8080
         readinessProbe:

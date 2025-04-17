@@ -15,7 +15,7 @@ export class AuthService {
     private readonly jwtService: JwtService, 
     private readonly userService: UserService,
     private readonly redis: RedisService
-  ) { }
+  ) {}
 
   async register(data: CreateUserDto, file: Express.Multer.File) {
     const existingUser = await this.userService.findByUsername(data.username.toLowerCase());

@@ -9,7 +9,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    env:
+      IMAGE_NAME: siamatic/smtrack-auth-service:1.1.1
     steps:
     - uses: actions/checkout@v4
     - name: Login to docker hub
@@ -22,20 +23,28 @@ jobs:
       with:
         context: .
         push: true
-        tags: siamatic/smtrack-auth-service:1.1.0
+        tags: ${{ env.IMAGE_NAME }}
+    - name: Update Kubernetes manifest with new image
+      run: |
+        sed -i "s|image: .*|image: ${{ env.IMAGE_NAME }}|" k8s/deploy.yaml
+        git config user.name "FangLy"
+        git config user.email "thefangsni@gmail.com"
+        git add k8s/deploy.yaml
+        git commit -m "${{ env.IMAGE_NAME }}"
+        git push
     - name: Send success message to slack
       id: slack
       uses: slackapi/slack-github-action@v1.27.0
       with:
         payload: |
           {
-            "text": "GitHub Action build siamatic/smtrack-auth-service:1.1.0 result: ${{ job.status }} 🖕🖕🖕🖕",
+            "text": "GitHub Action build ${{ env.IMAGE_NAME }} result: ${{ job.status }} 🖕🖕🖕🖕",
             "blocks": [
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "GitHub Action build siamatic/smtrack-auth-service:1.1.0 result: ${{ job.status }} 🖕🖕🖕🖕"
+                  "text": "GitHub Action build ${{ env.IMAGE_NAME }} result: ${{ job.status }} 🖕🖕🖕🖕"
                 }
               }
             ]

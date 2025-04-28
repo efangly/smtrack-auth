@@ -7,11 +7,12 @@ import { JwtPayloadDto } from 'src/auth/dto/payload.dto';
 import { Prisma } from '@prisma/client';
 import { RedisService } from '../redis/redis.service';
 import axios from 'axios';
+import { RabbitmqService } from '../rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class HospitalService {
-  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) { }
-  async create(createHospitalDto: CreateHospitalDto, file: Express.Multer.File) {
+  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService, private readonly rabbitmq: RabbitmqService) { }
+  async create(createHospitalDto: CreateHospitalDto, file?: Express.Multer.File) {
     if (file) createHospitalDto.hosPic = await uploadFile(file, 'hospital');
     createHospitalDto.createAt = dateFormat(new Date());
     createHospitalDto.updateAt = dateFormat(new Date());
@@ -39,7 +40,7 @@ export class HospitalService {
     });
   }
 
-  async update(id: string, updateHospitalDto: UpdateHospitalDto, file: Express.Multer.File) {
+  async update(id: string, updateHospitalDto: UpdateHospitalDto, file?: Express.Multer.File) {
     if (file) {
       updateHospitalDto.hosPic = await uploadFile(file, 'hospital');
       const hospital = await this.prisma.hospitals.findUnique({ where: { id } });
@@ -49,8 +50,10 @@ export class HospitalService {
       }
     }
     updateHospitalDto.updateAt = dateFormat(new Date());
+    const hospital = await this.prisma.hospitals.update({ where: { id }, data: updateHospitalDto });
+    await this.rabbitmq.sendToDevice<{ id: string, name: string }>('update-hospital', { id: hospital.id, name: hospital.hosName });
     await this.redis.del("hospital");
-    return this.prisma.hospitals.update({ where: { id }, data: updateHospitalDto });
+    return hospital;
   }
 
   async remove(id: string) {

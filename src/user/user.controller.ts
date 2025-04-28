@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, UseInterceptors, UploadedFile, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, UseInterceptors, UploadedFile, UseGuards, Request, Logger } from '@nestjs/common';
+import { EventPattern, Ctx, Payload, RmqContext } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -13,6 +14,46 @@ import { JwtPayloadDto } from '../auth/dto/payload.dto';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
+  private readonly logger = new Logger(UserController.name);
+
+  @EventPattern('add-user')
+  async addUser(@Payload() createUserDto: CreateUserDto, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    try {
+      await this.userService.create(createUserDto);
+      channel.ack(message);
+    } catch (error) {
+      this.logger.error(error);
+      channel.nack(message, false, false);
+    }
+  }
+
+  @EventPattern('update-user')
+  async updateUser(@Payload() updateUserDto: UpdateUserDto, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    try {
+      await this.userService.update(updateUserDto.id, updateUserDto);
+      channel.ack(message);
+    } catch (error) {
+      this.logger.error(error);
+      channel.nack(message, false, false);
+    }
+  }
+  
+  @EventPattern('delete-user')
+  async deleteUser(@Payload() id: string, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    try {
+      await this.userService.remove(id);
+      channel.ack(message);
+    } catch (error) {
+      this.logger.error(error);
+      channel.nack(message, false, false);
+    }
+  }
 
   @Post()
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)

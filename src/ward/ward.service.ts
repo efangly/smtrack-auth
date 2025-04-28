@@ -6,10 +6,11 @@ import { dateFormat } from '../common/utils';
 import { RedisService } from '../redis/redis.service';
 import { JwtPayloadDto } from '../auth/dto/payload.dto';
 import { Prisma } from '@prisma/client';
+import { RabbitmqService } from '../rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class WardService {
-  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) {}
+  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService, private readonly rabbitmq: RabbitmqService) {}
   async create(createWardDto: CreateWardDto) {
     createWardDto.createAt = dateFormat(new Date());
     createWardDto.updateAt = dateFormat(new Date());
@@ -37,15 +38,18 @@ export class WardService {
 
   async update(id: string, updateWardDto: UpdateWardDto) {
     updateWardDto.updateAt = dateFormat(new Date());
+    const ward = await this.prisma.wards.update({ where: { id }, data: updateWardDto });
+    await this.rabbitmq.sendToDevice<{ id: string, name: string }>('update-ward', { id: ward.id, name: ward.wardName });
     await this.redis.del("hospital");
     await this.redis.del("ward");
-    return this.prisma.wards.update({ where: { id }, data: updateWardDto });
+    return ward;
   }
 
   async remove(id: string) {
+    await this.prisma.wards.delete({ where: { id } });
     await this.redis.del("hospital");
     await this.redis.del("ward");
-    return this.prisma.wards.delete({ where: { id } });
+    return "Delete ward successfully";
   }
 
   private findCondition(user: JwtPayloadDto): { conditions: Prisma.WardsWhereInput | undefined, key: string } {

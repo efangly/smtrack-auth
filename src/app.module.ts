@@ -9,6 +9,7 @@ import { WardModule } from './ward/ward.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy, RefreshJwtStrategy } from './common/strategies';
 import { RedisModule } from './redis/redis.module';
+import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { RedisModule } from './redis/redis.module';
     UserModule, 
     HospitalModule, 
     WardModule, 
-    RedisModule
+    RedisModule, 
+    RabbitmqModule
   ],
   providers: [JwtStrategy, RefreshJwtStrategy],
 })

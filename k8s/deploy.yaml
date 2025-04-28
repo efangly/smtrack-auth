@@ -88,6 +88,11 @@ spec:
             configMapKeyRef:
               name: redis-config
               key: RADIS_PASSWORD
+        - name: RABBITMQ
+          valueFrom:
+            configMapKeyRef:
+              name: rabbitmq-config
+              key: RABBITMQ
         - name: NODE_ENV
           valueFrom:
             configMapKeyRef:

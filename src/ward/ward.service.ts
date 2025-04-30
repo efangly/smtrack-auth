@@ -39,7 +39,11 @@ export class WardService {
   async update(id: string, updateWardDto: UpdateWardDto) {
     updateWardDto.updateAt = dateFormat(new Date());
     const ward = await this.prisma.wards.update({ where: { id }, data: updateWardDto });
-    await this.rabbitmq.sendToDevice<{ id: string, name: string }>('update-ward', { id: ward.id, name: ward.wardName });
+    if (ward.type === 'LEGACY') {
+      await this.rabbitmq.sendToLegacy<{ id: string, name: string }>('update-ward', { id: ward.id, name: ward.wardName });
+    } else {
+      await this.rabbitmq.sendToDevice<{ id: string, name: string }>('update-ward', { id: ward.id, name: ward.wardName });
+    }
     await this.redis.del("hospital");
     await this.redis.del("ward");
     return ward;

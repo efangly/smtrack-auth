@@ -52,6 +52,7 @@ export class HospitalService {
     updateHospitalDto.updateAt = dateFormat(new Date());
     const hospital = await this.prisma.hospitals.update({ where: { id }, data: updateHospitalDto });
     await this.rabbitmq.sendToDevice<{ id: string, name: string }>('update-hospital', { id: hospital.id, name: hospital.hosName });
+    await this.rabbitmq.sendToLegacy<{ id: string, name: string }>('update-hospital', { id: hospital.id, name: hospital.hosName });
     await this.redis.del("hospital");
     return hospital;
   }

@@ -15,6 +15,17 @@ import { RabbitmqService } from './rabbitmq.service';
           queueOptions: { durable: true }
         }
       }
+    ]),
+    ClientsModule.register([
+      {
+        name: 'LEGACY_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBITMQ],
+          queue: 'templog_queue',
+          queueOptions: { durable: true }
+        }
+      }
     ])
   ],
   providers: [RabbitmqService],

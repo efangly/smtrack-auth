@@ -11,7 +11,6 @@ import { Role } from '@prisma/client';
 import { JwtPayloadDto } from '../auth/dto/payload.dto';
 
 @Controller('user')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
   private readonly logger = new Logger(UserController.name);
@@ -56,18 +55,21 @@ export class UserController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async findAll(@Request() req: { user: JwtPayloadDto }) {
     return this.userService.findAll(req.user);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async findOne(@Param('id') id: string) {
     const user = await this.userService.findOne(id);
     if (!user) throw new NotFoundException("User not found");
@@ -75,12 +77,14 @@ export class UserController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UseInterceptors(FileInterceptor('image'))
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @UploadedFile() file: Express.Multer.File) {
     return this.userService.update(id, updateUserDto, file);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }

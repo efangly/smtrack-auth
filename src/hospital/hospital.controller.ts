@@ -11,7 +11,6 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 
 @Controller('hospital')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class HospitalController {
   constructor(private readonly hospitalService: HospitalService) {}
   private readonly logger = new Logger(HospitalController.name);
@@ -56,6 +55,7 @@ export class HospitalController {
     }
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER, Role.SERVICE)
   @UseInterceptors(FileInterceptor('image'))
   async create(@Body() createHospitalDto: CreateHospitalDto, @UploadedFile() file: Express.Multer.File) {
@@ -63,12 +63,14 @@ export class HospitalController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async findAll(@Request() req: { user: JwtPayloadDto }) {
     return this.hospitalService.findAll(req.user);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async findOne(@Param('id') id: string) {
     const hospital = await this.hospitalService.findOne(id);
@@ -77,6 +79,7 @@ export class HospitalController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER, Role.SERVICE)
   @UseInterceptors(FileInterceptor('image'))
   async update(@Param('id') id: string, @Body() updateHospitalDto: UpdateHospitalDto, @UploadedFile() file: Express.Multer.File) {
@@ -84,6 +87,7 @@ export class HospitalController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER)
   async remove(@Param('id') id: string) {
     return this.hospitalService.remove(id);

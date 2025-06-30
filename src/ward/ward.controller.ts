@@ -10,7 +10,6 @@ import { Role } from '@prisma/client';
 import { JwtPayloadDto } from '../auth/dto/payload.dto';
 
 @Controller('ward')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class WardController {
   constructor(private readonly wardService: WardService) {}
   private readonly logger = new Logger(WardController.name);
@@ -55,18 +54,21 @@ export class WardController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER, Role.SERVICE)
   async create(@Body() createWardDto: CreateWardDto) {
     return this.wardService.create(createWardDto);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async findAll(@Request() req: { user: JwtPayloadDto }) {
     return this.wardService.findAll(req.user);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async findOne(@Param('id') id: string) {
     const ward = await this.wardService.findOne(id);
@@ -75,12 +77,14 @@ export class WardController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async update(@Param('id') id: string, @Body() updateWardDto: UpdateWardDto) {
     return this.wardService.update(id, updateWardDto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   async remove(@Param('id') id: string) {
     return this.wardService.remove(id);

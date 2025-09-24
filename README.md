@@ -24,7 +24,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+SMTrack Authentication Service - A NestJS-based microservice for user authentication and management with integrated logging and monitoring capabilities.
 
 ## Project setup
 
@@ -45,55 +45,187 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Run tests
+## Features
 
-```bash
-# unit tests
-$ npm run test
+- 🔐 **JWT Authentication** - Secure token-based authentication
+- 👥 **User Management** - Complete CRUD operations for users
+- 🏥 **Hospital & Ward Management** - Multi-tenant hospital and ward system
+- 📊 **Structured Logging** - Winston-based JSON logging for Grafana Loki
+- 🐰 **Message Queue Integration** - RabbitMQ for inter-service communication
+- 🗄️ **Database** - Prisma ORM with PostgreSQL
+- 🚀 **Redis Caching** - Performance optimization with Redis
+- 🔍 **Health Checks** - Built-in health monitoring
+- 🛡️ **Role-Based Access Control** - Granular permission system
 
-# e2e tests
-$ npm run test:e2e
+## Architecture
 
-# test coverage
-$ npm run test:cov
+This service follows a modular architecture with:
+
+- **Authentication Module**: JWT-based auth with refresh tokens
+- **User Module**: User management with role-based permissions
+- **Hospital Module**: Hospital management and configuration
+- **Ward Module**: Ward management within hospitals
+- **Common Module**: Shared utilities, guards, and interceptors
+
+## Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/smtrack_auth"
+
+# JWT Secrets
+JWT_SECRET="your-jwt-secret-key"
+JWT_REFRESH_SECRET="your-refresh-secret-key"
+EXPIRE_TIME="1h"
+REFRESH_EXPIRE_TIME="7d"
+
+# Redis
+REDIS_HOST="localhost"
+REDIS_PORT=6379
+REDIS_PASSWORD="your-redis-password"
+
+# RabbitMQ
+RABBITMQ="amqp://localhost:5672"
+
+# Upload Service
+UPLOAD_PATH="http://localhost:3001"
+
+# Application
+PORT=8080
+NODE_ENV="development"
+ALLOWED_ORIGINS="http://localhost:3000,http://localhost:3001"
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Database Setup
 
 ```bash
-$ npm install -g mau
-$ mau deploy
+# Generate Prisma client
+$ npx prisma generate
+
+# Run database migrations
+$ npx prisma migrate dev
+
+# Seed database (if seed file exists)
+$ npx prisma db seed
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Logging
 
-## Resources
+The application uses Winston for structured JSON logging, specifically configured for Grafana Loki integration:
 
-Check out a few resources that may come in handy when working with NestJS:
+- **Error Level**: Server errors (5xx status codes)
+- **Warn Level**: Client errors (4xx status codes) and warnings
+- **Format**: JSON with timestamp, service name, and contextual metadata
+- **Output**: stdout for container log collection
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Log Structure
 
-## Support
+```json
+{
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "level": "error",
+  "message": "Failed to create user",
+  "service": "smtrack-auth-service",
+  "error": {
+    "message": "Database connection failed",
+    "stack": "Error: Database connection failed..."
+  },
+  "userId": "user-123",
+  "action": "create_user"
+}
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## API Endpoints
 
-## Stay in touch
+### Authentication
+- `POST /auth/register` - Register new user
+- `POST /auth/login` - User login
+- `POST /auth/refresh` - Refresh JWT token
+- `PUT /auth/reset-password/:username` - Reset user password
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Users
+- `GET /auth/users` - Get all users (role-based filtering)
+- `GET /auth/users/:id` - Get user by ID
+- `PUT /auth/users/:id` - Update user
+- `DELETE /auth/users/:id` - Delete user
 
-## License
+### Hospitals
+- `GET /auth/hospitals` - Get hospitals
+- `GET /auth/hospitals/:id` - Get hospital by ID
+- `POST /auth/hospitals` - Create hospital
+- `PUT /auth/hospitals/:id` - Update hospital
+- `DELETE /auth/hospitals/:id` - Delete hospital
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Wards
+- `GET /auth/wards` - Get wards
+- `GET /auth/wards/:id` - Get ward by ID
+- `POST /auth/wards` - Create ward
+- `PUT /auth/wards/:id` - Update ward
+- `DELETE /auth/wards/:id` - Delete ward
+
+### Health Check
+- `GET /auth/health` - Application health status
+
+## Role-Based Access Control
+
+The system supports multiple user roles:
+
+- **SUPER**: Full system access
+- **SERVICE**: Cross-hospital service access
+- **ADMIN**: Hospital administrator access
+- **LEGACY_ADMIN**: Legacy system administrator
+
+## Monitoring & Observability
+
+- **Health Checks**: Built-in health endpoint for monitoring
+- **Structured Logging**: JSON logs for log aggregation systems
+- **Error Tracking**: Comprehensive error logging with context
+- **Performance Monitoring**: Request timing and caching metrics
+
+## Development
+
+```bash
+# Install dependencies
+$ npm install
+
+# Start development server
+$ npm run start:dev
+
+# Format code
+$ npm run format
+
+# Lint code
+$ npm run lint
+```
+
+## Production Deployment
+
+```bash
+# Build for production
+$ npm run build
+
+# Start production server
+$ npm run start:prod
+```
+
+## Docker Deployment
+
+The service includes a Dockerfile for containerized deployment. Ensure all environment variables are properly configured in your container orchestration platform.
+
+## Contributing
+
+1. Follow the established code style and patterns
+2. Add appropriate logging for new features
+3. Include error handling with proper HTTP status codes
+4. Update documentation for new endpoints or features
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Database Connection**: Verify DATABASE_URL and database availability
+2. **Redis Connection**: Check Redis configuration and connectivity
+3. **RabbitMQ**: Ensure RabbitMQ is running and accessible
+4. **JWT Errors**: Verify JWT secrets are properly configured

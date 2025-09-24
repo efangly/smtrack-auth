@@ -1,28 +1,39 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { LoggerService } from '../services';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(AllExceptionsFilter.name);
+  constructor(private readonly logger: LoggerService) {}
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
+    const request = ctx.getRequest();
+    
     let status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error'; 
+    let message = 'Internal server error';
+    // let errorDetails: any = {};
 
+    // Extract error message
     if (exception instanceof Error) {
       message = exception.message;
     }
     
     if (exception instanceof HttpException) {
-      if (typeof exception.getResponse() === 'object') { 
-        message = exception.getResponse()['message']; 
+      const exceptionResponse = exception.getResponse();
+      if (typeof exceptionResponse === 'object') { 
+        message = exceptionResponse['message'] || message;
+        // errorDetails = { ...errorDetails, ...exceptionResponse };
       } else { 
-        message = exception.getResponse().toString(); 
+        message = exceptionResponse.toString(); 
       }
     }
 
+    // Handle Prisma errors
     if (exception instanceof PrismaClientKnownRequestError) {
+      // errorDetails.prismaCode = exception.code;
+      // errorDetails.prismaMeta = exception.meta;
+      
       switch (exception.code) {
         case 'P2002':
           message = `The value for field '${exception.meta?.target}' already exists`;
@@ -32,11 +43,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
           message = 'Foreign key constraint failed';
           status = HttpStatus.BAD_REQUEST;
           break;
-        case 'P2024': // Record not found
+        case 'P2024':
           message = 'Timed out fetching a new connection from the connection pool';
           status = HttpStatus.INTERNAL_SERVER_ERROR;
           break;
-        case 'P2025': // Record not found
+        case 'P2025':
           message = 'The requested resource was not found';
           status = HttpStatus.NOT_FOUND;
           break;
@@ -46,11 +57,33 @@ export class AllExceptionsFilter implements ExceptionFilter {
           break;
       }
     }
-    if (status >= 500) this.logger.error(`Http Status: ${status} Error Message: ${message}`);
+
+    // Log errors and warnings
+    const logContext = {
+      method: request.method,
+      url: request.url,
+      statusCode: status,
+      userAgent: request.headers['user-agent'],
+      ip: request.ip,
+      userId: request.user?.id,
+      errorType: exception.constructor.name,
+      // ...errorDetails
+    };
+
+    if (status >= 500) {
+      this.logger.error(`Server Error: ${message}`, exception instanceof Error ? exception : null, logContext);
+    } else if (status >= 400) {
+      if (status !== 401) this.logger.warn(`Client Error: ${message}`, logContext);
+    }
+
+    // Return standardized error response  
     response.status(status).json({
       message: message,
       success: false,
       data: null,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+      method: request.method,
       traceStack: process.env.NODE_ENV === 'development' && exception instanceof Error ? exception.stack : undefined,
     });
   }

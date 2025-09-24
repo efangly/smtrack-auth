@@ -10,6 +10,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy, RefreshJwtStrategy } from './common/strategies';
 import { RedisModule } from './redis/redis.module';
 import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
+import { LoggerService } from './common/services';
 
 @Module({
   imports: [
@@ -24,6 +25,6 @@ import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
     RedisModule, 
     RabbitmqModule
   ],
-  providers: [JwtStrategy, RefreshJwtStrategy],
+  providers: [JwtStrategy, RefreshJwtStrategy, LoggerService],
 })
 export class AppModule {}

@@ -23,7 +23,7 @@ export class HospitalService {
       try {
         createHospitalDto.hosPic = await uploadFile(file, 'hospital');
       } catch (uploadError) {
-        this.logger.error('Failed to upload hospital image', uploadError, {
+        this.logger.error('Failed to upload hospital image', uploadError, 'HospitalService', {
           hospitalName: createHospitalDto.hosName,
           filename: file.originalname
         });
@@ -68,7 +68,7 @@ export class HospitalService {
     });
 
     if (!hospital) {
-      this.logger.warn('Hospital not found', { hospitalId: id, action: 'find_hospital' });
+      this.logger.warn('Hospital not found', 'HospitalService', { hospitalId: id, action: 'find_hospital' });
       throw new NotFoundException('Hospital not found');
     }
 
@@ -87,7 +87,7 @@ export class HospitalService {
             await axios.delete(`${process.env.UPLOAD_PATH}/api/image/hospital/${fileName}`);
           } catch (deleteError) {
             const fileName = hospital.hosPic.split('/')[hospital.hosPic.split('/').length - 1];
-            this.logger.warn('Failed to delete old hospital image', {
+            this.logger.warn('Failed to delete old hospital image', 'HospitalService', {
               hospitalId: id,
               filename: fileName,
               error: deleteError.message
@@ -95,7 +95,7 @@ export class HospitalService {
           }
         }
       } catch (uploadError) {
-        this.logger.error('Failed to upload hospital image', uploadError, {
+        this.logger.error('Failed to upload hospital image', uploadError, 'HospitalService', {
           hospitalId: id,
           filename: file.originalname
         });
@@ -122,7 +122,7 @@ export class HospitalService {
         })
       ]);
     } catch (messageError) {
-      this.logger.error('Failed to send hospital update notifications', messageError, {
+      this.logger.error('Failed to send hospital update notifications', messageError, 'HospitalService', {
         hospitalId: id,
         hospitalName: hospital.hosName
       });
@@ -136,7 +136,7 @@ export class HospitalService {
   async remove(id: string) {
     const existingHospital = await this.prisma.hospitals.findUnique({ where: { id } });
     if (!existingHospital) {
-      this.logger.warn('Attempt to delete non-existent hospital', { hospitalId: id });
+      this.logger.warn('Attempt to delete non-existent hospital', 'HospitalService', { hospitalId: id });
       throw new NotFoundException('Hospital not found');
     }
 
@@ -148,7 +148,7 @@ export class HospitalService {
         const fileName = hospital.hosPic.split('/')[hospital.hosPic.split('/').length - 1];
         await axios.delete(`${process.env.UPLOAD_PATH}/api/image/hospital/${fileName}`);
       } catch (imageDeleteError) {
-        this.logger.error('Error deleting hospital image', imageDeleteError, {
+        this.logger.error('Error deleting hospital image', imageDeleteError, 'HospitalService', {
           hospitalId: id,
           imagePath: hospital.hosPic
         });
@@ -191,7 +191,7 @@ export class HospitalService {
         key = "hospital";
         break;
       default:
-        this.logger.warn('Invalid role in hospital condition check', {
+        this.logger.warn('Invalid role in hospital condition check', 'HospitalService', {
           role: user.role,
           userId: user.id
         });

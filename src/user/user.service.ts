@@ -73,7 +73,7 @@ export class UserService {
     });
 
     if (!user) {
-      this.logger.warn('User not found', { userId: id, action: 'find_user' });
+      this.logger.warn('User not found', 'UserService', { userId: id, action: 'find_user' });
       throw new NotFoundException('User not found');
     }
 
@@ -105,7 +105,7 @@ export class UserService {
           try {
             await axios.delete(`${process.env.UPLOAD_PATH}/api/image/user/${fileName}`);
           } catch (deleteError) {
-            this.logger.warn('Failed to delete old user image', {
+            this.logger.warn('Failed to delete old user image', 'UserService', {
               userId: id,
               filename: fileName,
               error: deleteError.message
@@ -113,7 +113,7 @@ export class UserService {
           }
         }
       } catch (uploadError) {
-        this.logger.error('Failed to upload user image', uploadError, {
+        this.logger.error('Failed to upload user image', uploadError, 'UserService', {
           userId: id,
           filename: file.originalname
         });
@@ -133,7 +133,7 @@ export class UserService {
   async remove(id: string) {
     const existingUser = await this.prisma.users.findUnique({ where: { id } });
     if (!existingUser) {
-      this.logger.warn('Attempt to delete non-existent user', { userId: id });
+      this.logger.warn('Attempt to delete non-existent user', 'UserService', { userId: id });
       throw new NotFoundException('User not found');
     }
 
@@ -145,13 +145,13 @@ export class UserService {
         const fileName = user.pic.split('/')[user.pic.split('/').length - 1];
         const response = await axios.delete(`${process.env.UPLOAD_PATH}/api/image/user/${fileName}`);
         if (!response.data) {
-          this.logger.warn('Failed to delete user image from storage', {
+          this.logger.warn('Failed to delete user image from storage', 'UserService', {
             userId: id,
             filename: fileName
           });
         }
       } catch (imageDeleteError) {
-        this.logger.error('Error deleting user image', imageDeleteError, { userId: id, imagePath: user.pic });
+        this.logger.error('Error deleting user image', imageDeleteError, 'UserService', { userId: id, imagePath: user.pic });
       }
     }
     // Clear caches
@@ -195,7 +195,7 @@ export class UserService {
         key = 'user';
         break;
       default:
-        this.logger.warn('Invalid role in user condition check', {
+        this.logger.warn('Invalid role in user condition check', 'UserService', {
           role: user.role,
           userId: user.id
         });

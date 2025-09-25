@@ -124,16 +124,41 @@ The application uses Winston for structured JSON logging, specifically configure
 
 ```json
 {
-  "timestamp": "2024-01-15T10:30:00.000Z",
+  "timestamp": "2025-09-24T09:15:53.249Z",
+  "level": "warn",
+  "message": "HTTP 400 Warning: property config should not exist",
+  "service": "smtrack-auth-service",
+  "environment": "production",
+  "context": "AllExceptionsFilter",
+  "metadata": {
+    "status": 400,
+    "path": "/auth/users/123",
+    "method": "PUT",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "ip": "192.168.1.100"
+  }
+}
+```
+
+### Error Log Structure
+
+```json
+{
+  "timestamp": "2025-09-24T09:15:53.249Z",
   "level": "error",
   "message": "Failed to create user",
   "service": "smtrack-auth-service",
+  "environment": "production",
+  "context": "UserService",
+  "metadata": {
+    "username": "testuser",
+    "action": "create_user"
+  },
   "error": {
     "message": "Database connection failed",
-    "stack": "Error: Database connection failed..."
-  },
-  "userId": "user-123",
-  "action": "create_user"
+    "stack": "Error: Database connection failed...",
+    "name": "DatabaseError"
+  }
 }
 ```
 

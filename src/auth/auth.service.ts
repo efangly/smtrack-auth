@@ -22,7 +22,7 @@ export class AuthService {
   async register(data: CreateUserDto, file?: Express.Multer.File) {
     const existingUser = await this.userService.findByUsername(data.username.toLowerCase());
     if (existingUser) {
-      this.logger.warn('Registration attempt with existing username', {
+      this.logger.warn('Registration attempt with existing username', 'AuthService', {
         username: data.username,
         action: 'register'
       });
@@ -41,7 +41,7 @@ export class AuthService {
         });
 
         if (!response.data || !response.data.path) {
-          this.logger.error('Failed to upload user image', null, {
+          this.logger.error('Failed to upload user image', null, 'AuthService', {
             username: data.username,
             filename: file.originalname
           });
@@ -49,7 +49,7 @@ export class AuthService {
         }
         data.pic = `${process.env.UPLOAD_PATH}/${response.data.path}`;
       } catch (uploadError) {
-        this.logger.error('Image upload service error', uploadError, {
+        this.logger.error('Image upload service error', uploadError, 'AuthService', {
           username: data.username,
           filename: file?.originalname
         });
@@ -70,7 +70,7 @@ export class AuthService {
       return result;
     }
 
-    this.logger.warn('Invalid login attempt', {
+    this.logger.warn('Invalid login attempt', 'AuthService', {
       username,
       action: 'login'
     });
@@ -79,7 +79,7 @@ export class AuthService {
 
   async login(user: Users | any) {
     if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
-      this.logger.error('JWT secrets not configured', null, {
+      this.logger.error('JWT secrets not configured', null, 'AuthService', {
         action: 'login'
       });
       throw new InternalServerErrorException('Authentication configuration error');
@@ -113,7 +113,7 @@ export class AuthService {
 
   refreshTokens(token: string) {
     if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
-      this.logger.error('JWT secrets not configured', null, {
+      this.logger.error('JWT secrets not configured', null, 'AuthService', {
         action: 'refresh_tokens'
       });
       throw new InternalServerErrorException('Authentication configuration error');
@@ -146,7 +146,7 @@ export class AuthService {
   async resetPassword(username: string, body: ResetPasswordDto, user: JwtPayloadDto) {
     const result = await this.userService.findByUsername(username);
     if (!result) {
-      this.logger.warn('Password reset attempt for non-existent user', {
+      this.logger.warn('Password reset attempt for non-existent user', 'AuthService', {
         username,
         requestedBy: user.id,
         action: 'reset_password'
@@ -156,7 +156,7 @@ export class AuthService {
 
     if (user.role !== "SUPER") {
       if (!body.oldPassword) {
-        this.logger.warn('Password reset attempt without old password', {
+        this.logger.warn('Password reset attempt without old password', 'AuthService', {
           username,
           requestedBy: user.id,
           action: 'reset_password'
@@ -166,7 +166,7 @@ export class AuthService {
 
       const match = await bcrypt.compare(body.oldPassword, result.password);
       if (!match) {
-        this.logger.warn('Password reset attempt with incorrect old password', {
+        this.logger.warn('Password reset attempt with incorrect old password', 'AuthService', {
           username,
           requestedBy: user.id,
           action: 'reset_password'

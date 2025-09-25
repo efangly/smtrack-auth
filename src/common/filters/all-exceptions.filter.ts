@@ -4,12 +4,12 @@ import { LoggerService } from '../services';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  constructor(private readonly logger: LoggerService) {}
+  constructor(private readonly logger: LoggerService) { }
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
-    
+
     let status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
     // let errorDetails: any = {};
@@ -18,14 +18,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof Error) {
       message = exception.message;
     }
-    
+
     if (exception instanceof HttpException) {
       const exceptionResponse = exception.getResponse();
-      if (typeof exceptionResponse === 'object') { 
+      if (typeof exceptionResponse === 'object') {
         message = exceptionResponse['message'] || message;
         // errorDetails = { ...errorDetails, ...exceptionResponse };
-      } else { 
-        message = exceptionResponse.toString(); 
+      } else {
+        message = exceptionResponse.toString();
       }
     }
 
@@ -33,7 +33,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof PrismaClientKnownRequestError) {
       // errorDetails.prismaCode = exception.code;
       // errorDetails.prismaMeta = exception.meta;
-      
+
       switch (exception.code) {
         case 'P2002':
           message = `The value for field '${exception.meta?.target}' already exists`;
@@ -58,32 +58,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }
     }
 
-    // Log errors and warnings
-    const logContext = {
-      method: request.method,
-      url: request.url,
-      statusCode: status,
-      userAgent: request.headers['user-agent'],
-      ip: request.ip,
-      userId: request.user?.id,
-      errorType: exception.constructor.name,
-      // ...errorDetails
-    };
-
+    // Log errors and warnings using the new pattern
     if (status >= 500) {
-      this.logger.error(`Server Error: ${message}`, exception instanceof Error ? exception : null, logContext);
-    } else if (status >= 400) {
-      if (status !== 401) this.logger.warn(`Client Error: ${message}`, logContext);
+      this.logger.logHttpError(
+        message,
+        status,
+        request.url,
+        request.method,
+        request.headers['user-agent'],
+        request.ip || request.connection?.remoteAddress || 'Unknown'
+      );
     }
-
-    // Return standardized error response  
+  
     response.status(status).json({
       message: message,
       success: false,
       data: null,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      method: request.method,
       traceStack: process.env.NODE_ENV === 'development' && exception instanceof Error ? exception.stack : undefined,
     });
   }

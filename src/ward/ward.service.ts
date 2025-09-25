@@ -58,7 +58,7 @@ export class WardService {
     });
 
     if (!ward) {
-      this.logger.warn('Ward not found', { wardId: id, action: 'find_ward' });
+      this.logger.warn('Ward not found', 'WardService', { wardId: id, action: 'find_ward' });
       throw new NotFoundException('Ward not found');
     }
 
@@ -86,7 +86,7 @@ export class WardService {
         });
       }
     } catch (messageError) {
-      this.logger.error('Failed to send ward update notifications', messageError, {
+      this.logger.error('Failed to send ward update notifications', messageError, 'WardService', {
         wardId: id,
         wardName: ward.wardName,
         wardType: ward.type
@@ -107,7 +107,7 @@ export class WardService {
     // Check if ward exists first
     const existingWard = await this.prisma.wards.findUnique({ where: { id } });
     if (!existingWard) {
-      this.logger.warn('Attempt to delete non-existent ward', { wardId: id });
+      this.logger.warn('Attempt to delete non-existent ward', 'WardService', { wardId: id });
       throw new NotFoundException('Ward not found');
     }
 
@@ -153,7 +153,7 @@ export class WardService {
         key = "ward";
         break;
       default:
-        this.logger.warn('Invalid role in ward condition check', {
+        this.logger.warn('Invalid role in ward condition check', 'WardService', {
           role: user.role,
           userId: user.id
         });

@@ -33,10 +33,7 @@ async function bootstrap() {
     app.useGlobalInterceptors(new ResponseInterceptor(reflector));
     app.useGlobalFilters(new AllExceptionsFilter(customLogger));
     app.setGlobalPrefix('auth');
-    app.enableCors({
-      origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
-      credentials: true
-    });
+    app.enableCors({ origin: '*' });
     const port = process.env.PORT || 8080;
     await microservice.listen();
     await app.listen(port);
